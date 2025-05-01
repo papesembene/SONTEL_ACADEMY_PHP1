@@ -1,0 +1,289 @@
+{
+    "users": [
+        {
+            "id": "ADM-001",
+            "matricule": "ADM001",
+            "email": "admin@sonatel.sn",
+            "password": "passer123",
+            "role": "admin",
+            "nom": " pape sembene"
+        },
+        {
+            "matricule": "SEMHAC20250428",
+            "email": "sembenpape4@gmail.com",
+            "password": "passer123",
+            "role": "apprenant",
+            "password_change_required": false,
+            "id": "680f3f61d56b1"
+        },
+        {
+            "matricule": "DIOHAC20250429",
+            "email": "alice.diop@example.com",
+            "password": "SON@TEL2025",
+            "role": "apprenant",
+            "password_change_required": true,
+            "id": "6810214895687"
+        },
+        {
+            "matricule": "SOWHAC20250429",
+            "email": "baba.sow@example.com",
+            "password": "SON@TEL2025",
+            "role": "apprenant",
+            "password_change_required": true,
+            "id": "6810214895c1a"
+        },
+        {
+            "matricule": "NDIHAC20250429",
+            "email": "amycollendiaye103@gmail.com",
+            "password": "passer123",
+            "role": "apprenant",
+            "password_change_required": false,
+            "id": "6810ff3667ba4"
+        },
+        {
+            "matricule": "FALHAC20250430",
+            "email": "modoufall@gmail.com",
+            "password": "SON@TEL2025",
+            "role": "apprenant",
+            "password_change_required": true,
+            "id": "681221ebe0337"
+        }
+    ],
+    "referentiels": [
+        {
+            "nom": "HACKEUSE",
+            "description": "formation destinee uniquement aux femmes",
+            "photo": "ref_680d15de62407.png",
+            "capacite": "25",
+            "sessions": "2 sessions",
+            "nbr_modules": 0,
+            "id": "ref_680d15de62484",
+            "nbr_apprenants": 0
+        },
+        {
+            "nom": "DEV WEB\/MOBILE",
+            "description": "developpement web mobile",
+            "photo": "ref_68110059414a7.png",
+            "capacite": "30",
+            "sessions": "1 session",
+            "nbr_modules": 0,
+            "nbr_apprenants": 0,
+            "id": "ref_681100594151a"
+        }
+    ],
+    "promotions": [
+        {
+            "nom": "Promotion 7",
+            "date_debut": "12\/02\/2025",
+            "date_fin": "12\/12\/2025",
+            "photo": "promo_680d15f735b68.png",
+            "statut": "active",
+            "nbr_etudiants": 13,
+            "referentiels": [
+                "ref_680d15de62484",
+                "ref_681100594151a"
+            ],
+            "id": "promo_680d15f735c19"
+        },
+        {
+            "nom": "Promotion 1",
+            "date_debut": "12\/02\/2016",
+            "date_fin": "14\/12\/2016",
+            "photo": "promo_680e166bd0f48.png",
+            "statut": "inactive",
+            "nbr_etudiants": 0,
+            "referentiels": [
+                "ref_680d15de62484"
+            ],
+            "id": "promo_680e166bd110f"
+        }
+    ],
+    "apprenants": [
+        {
+            "nom": "Diagne",
+            "prenom": "Soxna Lala",
+            "email": "soxnae@gmail.com",
+            "telephone": "771234567",
+            "date_naissance": "1990-01-01",
+            "adresse": "Dakar, Nord Foire",
+            "photo": "app_680d1604259b9.png",
+            "statut": "actif",
+            "promotion": "promo_680d15f735c19",
+            "referentiel_id": "ref_680d15de62484",
+            "id": "app_680d160425a2f",
+            "matricule": "APP001"
+        },
+        {
+            "prenom": "mbene",
+            "nom": "FALL",
+            "date_naissance": "2025-04-23",
+            "lieu_naissance": "DAKAR",
+            "matricule": "FALHAC20250427",
+            "adresse": "DIAMNIADIO",
+            "telephone": "789067070",
+            "statut": "actif",
+            "email": "mbene@gmail.com",
+            "promotion_id": "promo_680d15f735c19",
+            "referentiel_id": "ref_680d15de62484",
+            "tuteur_nom": null,
+            "tuteur_adresse": "",
+            "tuteur_telephone": "",
+            "lien_parente": null,
+            "id": "app_680e16024863f"
+        },
+        {
+            "prenom": "pape birame",
+            "nom": "sembene",
+            "date_naissance": "2002-02-12",
+            "lieu_naissance": "DAKAR",
+            "matricule": "SEMHAC20250428",
+            "adresse": "DIAMNIADIO",
+            "telephone": "781157773",
+            "photo": "ref_680f3f61d4fa5.png",
+            "statut": "actif",
+            "email": "sembenpape4@gmail.com",
+            "promotion_id": "promo_680d15f735c19",
+            "referentiel_id": "ref_680d15de62484",
+            "tuteur_nom": "anta falll",
+            "tuteur_adresse": "diamniadio",
+            "tuteur_telephone": "784529557",
+            "lien_parente": "mere",
+            "id": "app_680f3f61d5045"
+        },
+        {
+            "prenom": "Alice",
+            "nom": "Diop",
+            "date_naissance": "2002-03-15",
+            "lieu_naissance": "Dakar",
+            "matricule": "DIOHAC20250429",
+            "adresse": "123 Rue Libert\u00e9",
+            "telephone": "771112233",
+            "photo": null,
+            "status": "actif",
+            "email": "alice.diop@example.com",
+            "promotion_id": "promo_680d15f735c19",
+            "referentiel_id": "ref_680d15de62484",
+            "tuteur_prenom_nom": "Mamadou Diop",
+            "tuteur_adresse": "123 Rue Libert\u00e9",
+            "tuteur_telephone": "771112234",
+            "tuteur_lien_parente": "P\u00e8re",
+            "id": "app_681021112b238"
+        },
+        {
+            "prenom": "Baba",
+            "nom": "Sow",
+            "date_naissance": "2001-07-20",
+            "lieu_naissance": "Thi\u00e8s",
+            "matricule": "SOWHAC20250429",
+            "adresse": "456 Avenue Paix",
+            "telephone": "770223344",
+            "photo": null,
+            "status": "actif",
+            "email": "baba.sow@example.com",
+            "promotion_id": "promo_680d15f735c19",
+            "referentiel_id": "ref_680d15de62484",
+            "tuteur_prenom_nom": "Awa Sow",
+            "tuteur_adresse": "456 Avenue Paix",
+            "tuteur_telephone": "770223345",
+            "tuteur_lien_parente": "M\u00e8re",
+            "id": "app_681021489576e"
+        },
+        {
+            "prenom": "amy ",
+            "nom": "ndiaye",
+            "date_naissance": "2025-04-22",
+            "lieu_naissance": "DAKAR",
+            "matricule": "NDIHAC20250429",
+            "adresse": "DIAMNIADIO",
+            "telephone": "789080801",
+            "photo": "ref_6810ff3667418.png",
+            "statut": "actif",
+            "email": "amycollendiaye103@gmail.com",
+            "promotion_id": "promo_680d15f735c19",
+            "referentiel_id": "ref_680d15de62484",
+            "tuteur_nom": "anta fallla",
+            "tuteur_adresse": "diamniadio",
+            "tuteur_telephone": "77777777",
+            "lien_parente": "mere",
+            "id": "app_6810ff36674b8"
+        },
+        {
+            "prenom": "modou",
+            "nom": "fall",
+            "date_naissance": "2025-04-21",
+            "lieu_naissance": "ZIGUINCHOR",
+            "matricule": "FALHAC20250430",
+            "adresse": "GUEDIAWAYE",
+            "telephone": "781157773",
+            "photo": "ref_681221ebdffc8.png",
+            "statut": "actif",
+            "email": "modoufall@gmail.com",
+            "promotion_id": "promo_680d15f735c19",
+            "referentiel_id": "ref_680d15de62484",
+            "tuteur_nom": "ndiaga fall",
+            "tuteur_adresse": "Diamniadio",
+            "tuteur_telephone": "784529557",
+            "lien_parente": "pere",
+            "id": "app_681221ebe00ca"
+        }
+    ],
+    "apprenants_waiting": {
+        "1": {
+            "prenom": "Alice",
+            "nom": "Diop",
+            "date_naissance": "2002-03-15",
+            "lieu_naissance": "Dakar",
+            "adresse": "123 Rue Libert\u00e9",
+            "telephone": "771112233",
+            "email": "alice.diop@example.com",
+            "referentiel_id": "ref_680d15de62484",
+            "tuteur_prenom_nom": "Mamadou Diop",
+            "tuteur_adresse": "123 Rue Libert\u00e9",
+            "tuteur_telephone": "771112234",
+            "tuteur_lien_parente": "P\u00e8re",
+            "id": "wait_6813c2e0eb83a",
+            "errors": {
+                "email": "Email existe d\u00e9j\u00e0 en base de donn\u00e9es"
+            },
+            "status": "waiting"
+        },
+        "2": {
+            "prenom": "Baba",
+            "nom": "Sow",
+            "date_naissance": "2001-07-20",
+            "lieu_naissance": "Thi\u00e8s",
+            "adresse": "456 Avenue Paix",
+            "telephone": "770223344",
+            "email": "baba.sow@example.com",
+            "referentiel_id": "ref_680d15de62484",
+            "tuteur_prenom_nom": "Awa Sow",
+            "tuteur_adresse": "456 Avenue Paix",
+            "tuteur_telephone": "770223345",
+            "tuteur_lien_parente": "M\u00e8re",
+            "id": "wait_6813c2e0eb9a4",
+            "errors": {
+                "email": "Email existe d\u00e9j\u00e0 en base de donn\u00e9es"
+            },
+            "status": "waiting"
+        },
+        "3": {
+            "prenom": "Fatou",
+            "nom": "Ndiaye",
+            "date_naissance": "2003-11-30",
+            "lieu_naissance": "Saint-Louis",
+            "adresse": "789 Boulevard Sud",
+            "telephone": "770334455",
+            "email": "fatou.ndiaye@example.com",
+            "referentiel_id": "1",
+            "tuteur_prenom_nom": "Ousmane Ndiaye",
+            "tuteur_adresse": "789 Boulevard Sud",
+            "tuteur_telephone": "770334456",
+            "tuteur_lien_parente": "P\u00e8re",
+            "id": "wait_6813c2e0eba73",
+            "errors": {
+                "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        }
+    }
+}
