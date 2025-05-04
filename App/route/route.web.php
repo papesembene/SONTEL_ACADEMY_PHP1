@@ -98,6 +98,7 @@
          },
 
         'POST /referentiels/unassign' => fn() => App\Controllers\Referentiels\unassignReferentiel(),
+        
         'GET /logout' => function() {
             session_destroy_all();
             Controller\redirect('/');

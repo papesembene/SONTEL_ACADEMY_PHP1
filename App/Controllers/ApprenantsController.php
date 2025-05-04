@@ -21,13 +21,12 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 
-// Ajouter une fonction pour récupérer les apprenants en attente
+
 function getWaitingApprenants() {
     $model = require __DIR__ . '/../Models/ApprenantModel.php';
     return $model[Apprenant_Model_Key::GET_WAITING_LIST->value]();
 }
 
-// Modifier la fonction handleApprenantActions pour gérer les nouvelles actions
 function handleApprenantActions() {
     session_init();
     try {
@@ -61,8 +60,63 @@ function handleApprenantActions() {
         }
         elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $action = $_GET['action'] ?? 'list';
-            $apprenants = getAllApprenants();
-            $waitingApprenants = getWaitingApprenants();
+            
+            // Paramètres de pagination
+            $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+            $perPage = isset($_GET['per_page']) ? (int)$_GET['per_page'] : 10;
+            $tab = $_GET['tab'] ?? 'retained';
+            
+            // Paramètre de filtrage par référentiel
+            $referentielFilter = isset($_GET['referentiel']) ? $_GET['referentiel'] : null;
+            $promoactive = isset($_GET['promotion']) ? $_GET['promotion'] : null ;
+           
+            
+            // Récupérer tous les apprenants
+            $allApprenants = getAllApprenants();
+            $allWaitingApprenants = getWaitingApprenants();
+            
+            // Filtrer par référentiel si nécessaire
+            if ($referentielFilter) {
+                $allApprenants = array_filter($allApprenants, function($apprenant) use ($referentielFilter,$promoactive) {
+                    
+                    return $apprenant['referentiel_id'] == $referentielFilter && $apprenant['promotion_id'] == $promoactive;
+                  
+                });
+             
+                $allWaitingApprenants = array_filter($allWaitingApprenants, function($apprenant) use ($referentielFilter) {
+                    return isset($apprenant['referentiel_id']) && $apprenant['referentiel_id'] === $referentielFilter;
+                });
+                
+                // Réindexer les tableaux après filtrage
+                $allApprenants = array_values($allApprenants);
+                $allWaitingApprenants = array_values($allWaitingApprenants);
+            }
+            
+            // Pagination pour les apprenants retenus
+            $totalRetained = count($allApprenants);
+            $totalPagesRetained = ceil($totalRetained / $perPage);
+
+            $currentPage = max(1, min($currentPage, $totalPagesRetained > 0 ? $totalPagesRetained : 1));
+            $startIndexRetained = ($currentPage - 1) * $perPage;
+            $apprenants = array_slice($allApprenants, $startIndexRetained, $perPage);
+            
+            // Pagination pour les apprenants en attente
+            $totalWaiting = count($allWaitingApprenants);
+            $totalPagesWaiting = ceil($totalWaiting / $perPage);
+            $currentPageWaiting = $tab === 'waiting' ? $currentPage : 1;
+
+            $currentPageWaiting = max(1, min($currentPageWaiting, $totalPagesWaiting > 0 ? $totalPagesWaiting : 1));
+            $startIndexWaiting = ($currentPageWaiting - 1) * $perPage;
+            $waitingApprenants = array_slice($allWaitingApprenants, $startIndexWaiting, $perPage);
+            
+            // Calcul des indices pour l'affichage
+            $startIndex = $tab === 'retained' ? ($totalRetained > 0 ? $startIndexRetained + 1 : 0) : ($totalWaiting > 0 ? $startIndexWaiting + 1 : 0);
+            $endIndex = $tab === 'retained' 
+                ? min($startIndexRetained + $perPage, $totalRetained) 
+                : min($startIndexWaiting + $perPage, $totalWaiting);
+            $totalItems = $tab === 'retained' ? $totalRetained : $totalWaiting;
+            $totalPages = $tab === 'retained' ? $totalPagesRetained : $totalPagesWaiting;
+            
             $allreferentiels = \App\Controllers\Referentiels\get_all_referentiels();
             $validation_errors = session_get('validation_errors', []);
             $oldInput = session_get('old_input', []);
@@ -88,13 +142,10 @@ function handleApprenantActions() {
                 }
                 
                 if ($waitingApprenant) {
-                    // Préparer les données pour le formulaire d'édition
-                    // Si pas de old_input (première visite), utiliser les données de l'apprenant en attente
                     if (empty($oldInput)) {
                         $oldInput = $waitingApprenant;
                     }
-                    
-                    // Si pas d'erreurs de validation (première visite), utiliser les erreurs de l'apprenant en attente
+                
                     if (empty($validation_errors) && isset($waitingApprenant['errors'])) {
                         $validation_errors = $waitingApprenant['errors'];
                     }
@@ -151,7 +202,16 @@ function handleApprenantActions() {
                     'oldInput' => $oldInput,
                     'activeData' => $activeData,
                     'activePromotion' => $activePromotion,
-                    'referentiels' => $referentiels
+                    'referentiels' => $referentiels,
+                    // Ajouter les informations de pagination
+                    'currentPage' => $currentPage,
+                    'perPage' => $perPage,
+                    'totalItems' => $totalItems,
+                    'totalPages' => $totalPages,
+                    'startIndex' => $startIndex,
+                    'endIndex' => $endIndex,
+                    'tab' => $tab,
+                    'referentielFilter' => $referentielFilter
                 ]
             );
         }
@@ -288,66 +348,66 @@ function createApprenant() {
         App\redirect('/apprenants');
 }
 
-function updateApprenant() {
-    try {
-        $id = $_POST[ApprenantAttribute::ID->value] ?? null;
-        $data = $_POST;
-        // Validation des données
-        $errors = Validator\validate_apprenant($data, $id);
-        if (!empty($errors)) {
-            session_set('validation_errors', $errors);
-            session_set('old_input', $data);
-            App\redirect('/apprenants/edit/' . $id);
-            exit;
+    function updateApprenant() {
+        try {
+            $id = $_POST[ApprenantAttribute::ID->value] ?? null;
+            $data = $_POST;
+            // Validation des données
+            $errors = Validator\validate_apprenant($data, $id);
+            if (!empty($errors)) {
+                session_set('validation_errors', $errors);
+                session_set('old_input', $data);
+                App\redirect('/apprenants/edit/' . $id);
+                exit;
+            }
+            $model = require __DIR__ . '/../Models/ApprenantModel.php';
+            $model[Apprenant_Model_Key::UPDATE->value]($id, $data);
+            session_set('success_message', ['content' => 'Apprenant mis à jour avec succès']);
+            App\redirect('/apprenants');
+        } catch (\Exception $e) {
+            session_set('error_message', ['content' => $e->getMessage()]);
+            App\redirect('/apprenants');
         }
-        $model = require __DIR__ . '/../Models/ApprenantModel.php';
-        $model[Apprenant_Model_Key::UPDATE->value]($id, $data);
-        session_set('success_message', ['content' => 'Apprenant mis à jour avec succès']);
-        App\redirect('/apprenants');
-    } catch (\Exception $e) {
-        session_set('error_message', ['content' => $e->getMessage()]);
-        App\redirect('/apprenants');
     }
-}
 
-function deleteApprenant() {
-    try {
-        $id = $_POST[ApprenantAttribute::ID->value] ?? null;
+    function deleteApprenant() {
+        try {
+            $id = $_POST[ApprenantAttribute::ID->value] ?? null;
 
-        if (!$id) {
-            throw new \Exception('ID de l\'apprenant manquant');
+            if (!$id) {
+                throw new \Exception('ID de l\'apprenant manquant');
+            }
+
+            $model = require __DIR__ . '/../Models/ApprenantModel.php';
+            $model[Apprenant_Model_Key::DELETE->value]($id);
+
+            session_set('success_message', ['content' => 'Apprenant supprimé avec succès']);
+            App\redirect('/apprenants');
+        } catch (\Exception $e) {
+            session_set('error_message', ['content' => $e->getMessage()]);
+            App\redirect('/apprenants');
         }
-
-        $model = require __DIR__ . '/../Models/ApprenantModel.php';
-        $model[Apprenant_Model_Key::DELETE->value]($id);
-
-        session_set('success_message', ['content' => 'Apprenant supprimé avec succès']);
-        App\redirect('/apprenants');
-    } catch (\Exception $e) {
-        session_set('error_message', ['content' => $e->getMessage()]);
-        App\redirect('/apprenants');
     }
-}
 
-function getAllApprenants() {
-    $model = require __DIR__ . '/../Models/ApprenantModel.php';
-    return $model[Apprenant_Model_Key::GET_ALL->value]();
-}
+    function getAllApprenants() {
+        $model = require __DIR__ . '/../Models/ApprenantModel.php';
+        return $model[Apprenant_Model_Key::GET_ALL->value]();
+    }
 
-function getApprenantsByPromotion($promotionId) {
-    $model = require __DIR__ . '/../Models/ApprenantModel.php';
-    return $model[Apprenant_Model_Key::GET_BY_PROMOTION->value]($promotionId);
-}
+    function getApprenantsByPromotion($promotionId) {
+        $model = require __DIR__ . '/../Models/ApprenantModel.php';
+        return $model[Apprenant_Model_Key::GET_BY_PROMOTION->value]($promotionId);
+    }
 
-function getApprenantsByReferentiel($referentielId) {
-    $model = require __DIR__ . '/../Models/ApprenantModel.php';
-    return $model[Apprenant_Model_Key::GET_BY_REFERENTIEL->value]($referentielId);
-}
+    function getApprenantsByReferentiel($referentielId) {
+        $model = require __DIR__ . '/../Models/ApprenantModel.php';
+        return $model[Apprenant_Model_Key::GET_BY_REFERENTIEL->value]($referentielId);
+    }
 
-function getApprenantById($id) {
-    $model = require __DIR__ . '/../Models/ApprenantModel.php';
-    return $model[Apprenant_Model_Key::GET_BY_ID->value]($id);
-}
+    function getApprenantById($id) {
+        $model = require __DIR__ . '/../Models/ApprenantModel.php';
+        return $model[Apprenant_Model_Key::GET_BY_ID->value]($id);
+    }
 
 function handle_file_upload($file) {
     $upload_dir = __DIR__.'/../../public/uploads/apprenants/';
@@ -369,317 +429,372 @@ function importApprenant() {
     session_init();
    
     // Initialiser le rapport d'importation
-    $import_report = [
+    $rapport_import = [
         'total' => 0,
-        'success' => 0,
-        'failed' => 0,
-        'waiting' => 0,
-        'duplicates' => 0,
-        'errors' => []
+        'succes' => 0,
+        'echec' => 0,
+        'attente' => 0,
+        'doublons' => 0,
+        'erreurs' => []
     ];
 
     try {
-        // 1. Valider le fichier
+        // 1. Valider et charger le fichier
         if (!isset($_FILES['import_file']) || $_FILES['import_file']['error'] !== UPLOAD_ERR_OK) {
             throw new \Exception('Aucun fichier n\'a été téléchargé');
         }
         
-        $file = $_FILES['import_file'];
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $fichier = $_FILES['import_file'];
+        $ext = strtolower(pathinfo($fichier['name'], PATHINFO_EXTENSION));
         
         // 2. Charger les données du fichier
+        $donnees = [];
         if ($ext === 'xlsx' || $ext === 'xls') {
             require_once __DIR__ . '/../../vendor/autoload.php';
-            $data = parse_excel_file($file['tmp_name']);
+            $donnees = parse_excel_file($fichier['tmp_name']);
         }
       
-        $import_report['total'] = count($data);
+        $rapport_import['total'] = count($donnees);
       
         // 3. Valider les données
         require_once __DIR__ . '/../Services/Validation_importation.php';
-        $validation_results = \App\Services\Validation_importation\validate_import_data($data);
-      
-        // Séparer les données valides et invalides
-        $valid_data = [];
-        $invalid_data = [];
+        $resultats_validation = \App\Services\Validation_importation\validate_import_data($donnees);
         
-        if (!empty($validation_results['rows'])) {
-            // Parcourir chaque ligne de données
-            foreach ($data as $index => $row) {
-                $row_number = $index + 2; // Correspond à la numérotation dans le validateur
-                
-                if (isset($validation_results['rows'][$row_number])) {
-                    // La ligne a des erreurs
-                    $invalid_data[] = [
-                        'row' => $row,
-                        'errors' => $validation_results['rows'][$row_number]
-                    ];
-                } else {
-                    // La ligne est valide
-                    $valid_data[] = $row;
-                }
-            }
-        } else {
-            // Toutes les données sont valides
-            $valid_data = $data;
-        }
-
-        $import_report['failed'] = count($invalid_data);
-        $import_report['errors'] = $invalid_data;
+        // Traiter les résultats de validation
+        list($donnees_valides, $donnees_invalides) = traiterResultatsValidation($donnees, $resultats_validation);
+        $rapport_import['echec'] = count($donnees_invalides);
+        $rapport_import['erreurs'] = $donnees_invalides;
        
         // S'il n'y a aucune donnée valide, rediriger avec rapport d'erreur
-        if (empty($valid_data) && empty($invalid_data)) {
+        if (empty($donnees_valides) && empty($donnees_invalides)) {
             session_set('warning_message', ['content' => 'Aucune donnée valide à importer.']);
             App\redirect('/apprenants?action=import');
             return;
         }
         
-        // 4. Récupérer la liste d'attente existante pour vérifier les doublons
-        $model = require __DIR__ . '/../Models/ApprenantModel.php';
-        $waitingList = $model[Apprenant_Model_Key::GET_WAITING_LIST->value]();
+        // 4. Gérer les données invalides et valides
+        $rapport_import = traiterDonneesImportation($donnees_valides, $donnees_invalides, $rapport_import);
         
-        // Créer des tableaux pour stocker les emails et matricules existants
-        $existingEmails = [];
-        $existingMatricules = [];
+        // 5. Définir le message d'importation
+        definirMessageImportation($rapport_import);
         
-        // Remplir les tableaux avec les données existantes
-        foreach ($waitingList as $waiting) {
-            if (isset($waiting['email']) && !empty($waiting['email'])) {
-                $existingEmails[] = strtolower($waiting['email']);
-            }
-            if (isset($waiting['matricule']) && !empty($waiting['matricule'])) {
-                $existingMatricules[] = $waiting['matricule'];
-            }
-        }
-        
-        // 5. Ajouter les données invalides à la liste d'attente en évitant les doublons
-        foreach ($invalid_data as $item) {
-            $apprenantData = $item['row'];
-            $errors = $item['errors'];
-            
-            // Vérifier si l'email ou le matricule existe déjà dans la liste d'attente
-            $isDuplicate = false;
-            
-            if (isset($apprenantData['email']) && !empty($apprenantData['email'])) {
-                $email = strtolower($apprenantData['email']);
-                if (in_array($email, $existingEmails)) {
-                    $isDuplicate = true;
-                    $import_report['duplicates']++;
-                } else {
-                    $existingEmails[] = $email; // Ajouter à la liste pour les prochaines vérifications
-                }
-            }
-            
-            if (isset($apprenantData['matricule']) && !empty($apprenantData['matricule'])) {
-                if (in_array($apprenantData['matricule'], $existingMatricules)) {
-                    $isDuplicate = true;
-                    $import_report['duplicates']++;
-                } else {
-                    $existingMatricules[] = $apprenantData['matricule']; // Ajouter à la liste pour les prochaines vérifications
-                }
-            }
-            
-            // Si ce n'est pas un doublon, ajouter à la liste d'attente
-            if (!$isDuplicate) {
-                $model[Apprenant_Model_Key::ADD_TO_WAITING_LIST->value]($apprenantData, $errors);
-                $import_report['waiting']++;
-            }
-        }
-       
-        // 6. Importer les données valides
-        $userModel = require __DIR__ . '/../Models/User.model.php';
-        $activePromoInfo = getActivePromotionAndReferentiels(); 
-        
-        // Récupérer tous les apprenants existants pour vérifier les doublons
-        $allApprenants = $model[Apprenant_Model_Key::GET_ALL->value]();
-        $allUsers = $userModel[UserModelKey::GET_ALL_EMAILS->value]();
-        
-        foreach ($valid_data as $row) {
-            try {
-                // Vérifier si le matricule ou l'email existe déjà dans la base de données
-                $existingApprenant = null;
-                if (isset($row['matricule']) && !empty($row['matricule'])) {
-                    $existingApprenant = $model[Apprenant_Model_Key::FIND_BY_MATRICULE->value]($row['matricule'] ?? '');
-                }
-
-                $existingUser = null;
-                if (isset($row['email']) && !empty($row['email'])) {
-                    $existingUser = $userModel[UserModelKey::FIND_BY_EMAIL->value]($row['email']);
-                }
-
-                // Si un doublon est détecté, vérifier s'il existe déjà dans la liste d'attente
-                if ($existingApprenant || $existingUser) {
-                    $import_report['duplicates']++;
-                    $errorMessage = [];
-                    
-                    if ($existingApprenant) {
-                        $errorMessage[] = "Matricule déjà existant : {$row['matricule']}";
-                    }
-                    
-                    if ($existingUser) {
-                        $errorMessage[] = "Email déjà utilisé : {$row['email']}";
-                    }
-                    
-                    // Vérifier si cet email ou matricule existe déjà dans la liste d'attente
-                    $isDuplicate = false;
-                    
-                    if (isset($row['email']) && !empty($row['email'])) {
-                        $email = strtolower($row['email']);
-                        if (in_array($email, $existingEmails)) {
-                            $isDuplicate = true;
-                        } else {
-                            $existingEmails[] = $email;
-                        }
-                    }
-                    
-                    if (isset($row['matricule']) && !empty($row['matricule'])) {
-                        if (in_array($row['matricule'], $existingMatricules)) {
-                            $isDuplicate = true;
-                        } else {
-                            $existingMatricules[] = $row['matricule'];
-                        }
-                    }
-                    
-                    // Si ce n'est pas un doublon dans la liste d'attente, l'ajouter
-                    if (!$isDuplicate) {
-                        $model[Apprenant_Model_Key::ADD_TO_WAITING_LIST->value]($row, ['doublon' => implode(', ', $errorMessage)]);
-                        $import_report['waiting']++;
-                    }
-                    
-                    continue;
-                }
-
-                // Générer le matricule
-                $referentiels = $activePromoInfo['referentiels'];
-                // Convertir $referentiels en un tableau indexé par l'ID
-                $referentiels_by_id = [];
-                foreach ($referentiels as $referentiel) {
-                    $referentiels_by_id[$referentiel['id']] = $referentiel;
-                }
-
-                // Accéder au nom du référentiel en utilisant $row['referentiel_id']
-                $referentiel_id = $row['referentiel_id'];
-                if (isset($referentiels_by_id[$referentiel_id])) {
-                    $referentiel_nom = $referentiels_by_id[$referentiel_id]['nom'];
-                } else {
-                    // Si le référentiel n'est pas trouvé, vous pouvez gérer l'erreur
-                    error_log("Référentiel non trouvé pour ID: $referentiel_id");
-                    $referentiel_nom = "Inconnu";
-                }
-
-                $matricule = generer_matricule($row['nom'], $referentiel_nom);
-             
-                // Gérer la photo si présente
-                $photo_path = null;
-                if (isset($row['photo_tmp']) && $row['photo_tmp']) {
-                    $photo_path = handlePhotoUpload($row);
-                }  
-                       
-                // Créer l'apprenant
-                $newApprenant = [
-                    'prenom' => $row['prenom'],
-                    'nom' => $row['nom'],
-                    'date_naissance' => $row['date_naissance'],
-                    'lieu_naissance' => $row['lieu_naissance'] ?? '',
-                    'matricule' => $matricule,
-                    'adresse' => $row['adresse'],
-                    'telephone' => $row['telephone'],
-                    'photo' => $photo_path,
-                    'status' => 'actif',
-                    'email' => $row['email'],
-                    'promotion_id' => $activePromoInfo['promotion']['id'],
-                    'referentiel_id' => $row['referentiel_id'],
-                    'tuteur_prenom_nom' => $row['tuteur_prenom_nom'] ?? '',
-                    'tuteur_adresse' => $row['tuteur_adresse'] ?? '',
-                    'tuteur_telephone' => $row['tuteur_telephone'] ?? '',
-                    'tuteur_lien_parente' => $row['tuteur_lien_parente'] ?? ''
-                ]; 
-               
-                // Ajouter l'apprenant à la base de données
-                $model[Apprenant_Model_Key::ADD->value]($newApprenant);  
-                // Créer un compte utilisateur
-                $userModel[UserModelKey::ADD->value]([
-                    'matricule' => $matricule,
-                    'email' => $row['email'],
-                    'password' => 'SON@TEL2025',
-                    'role' => 'apprenant',
-                    'password_change_required' => true
-                ]);
-                
-                $import_report['success']++;
-            } catch (\Exception $e) {
-                // Vérifier si cet email ou matricule existe déjà dans la liste d'attente
-                $isDuplicate = false;
-                
-                if (isset($row['email']) && !empty($row['email'])) {
-                    $email = strtolower($row['email']);
-                    if (in_array($email, $existingEmails)) {
-                        $isDuplicate = true;
-                    } else {
-                        $existingEmails[] = $email;
-                    }
-                }
-                
-                if (isset($row['matricule']) && !empty($row['matricule'])) {
-                    if (in_array($row['matricule'], $existingMatricules)) {
-                        $isDuplicate = true;
-                    } else {
-                        $existingMatricules[] = $row['matricule'];
-                    }
-                }
-                
-                // Si ce n'est pas un doublon dans la liste d'attente, l'ajouter
-                if (!$isDuplicate) {
-                    $model[Apprenant_Model_Key::ADD_TO_WAITING_LIST->value]($row, ['exception' => $e->getMessage()]);
-                    $import_report['waiting']++;
-                }
-                
-                $import_report['failed']++;
-            }
-        }
-        
-        // 7. Mettre à jour le nombre d'étudiants dans la promotion
-        if ($import_report['success'] > 0) {
-            $promotion = $activePromoInfo['promotion'];
-            $promoModel = require __DIR__ . '/../Models/Promo.model.php';
-            $promoModel['update']($promotion['id'], [
-                'nbr_etudiants' => ($promotion['nbr_etudiants'] ?? 0) + $import_report['success']
-            ]);
-        }
-        
-        // 8. Définir un message simple pour l'importation
-        if ($import_report['success'] > 0 && $import_report['waiting'] > 0) {
-            // Cas où certains apprenants ont été importés et d'autres sont en attente
-            $message = "Importation terminée : {$import_report['success']} apprenants importés avec succès, {$import_report['waiting']} placés en liste d'attente.";
-            session_set('warning_message', ['content' => $message]);
-        } else if ($import_report['success'] > 0) {
-            // Cas où tous les apprenants ont été importés avec succès
-            $message = "Importation réussie : {$import_report['success']} apprenants importés.";
-            session_set('success_message', ['content' => $message]);
-        } else if ($import_report['waiting'] > 0) {
-            // Cas où aucun apprenant n'a été importé, tous sont en attente
-            $message = "Importation terminée : Aucun apprenant importé, {$import_report['waiting']} placés en liste d'attente.";
-            session_set('warning_message', ['content' => $message]);
-        } else {
-            // Cas où aucun apprenant n'a été importé et aucun n'est en attente
-            session_set('error_message', ['content' => "Échec de l'importation : Aucun apprenant importé."]);
-        }
-        
-        // Stocker le rapport d'importation pour l'affichage détaillé dans la page d'importation
-        session_set('import_report', $import_report);
+        // Stocker le rapport d'importation pour l'affichage
+        session_set('import_report', $rapport_import);
         
         App\redirect('/apprenants?action=import');
         
     } catch (\Exception $e) {
-        error_log("Import error: " . $e->getMessage());
+        error_log("Erreur d'importation: " . $e->getMessage());
         session_set('error_message', ['content' => "Échec de l'importation : Une erreur est survenue."]);
         App\redirect('/apprenants?action=import');
     }
 }
 
 /**
- * Parse un fichier Excel et retourne les données sous forme de tableau
+ * Traite les résultats de validation et sépare les données valides et invalides
  */
+function traiterResultatsValidation($donnees, $resultats_validation) {
+    $donnees_valides = [];
+    $donnees_invalides = [];
+    
+    if (!empty($resultats_validation['rows'])) {
+        foreach ($donnees as $index => $ligne) {
+            $numero_ligne = $index + 2; // Correspond à la numérotation dans le validateur
+            
+            if (isset($resultats_validation['rows'][$numero_ligne])) {
+                // La ligne a des erreurs
+                $donnees_invalides[] = [
+                    'row' => $ligne,
+                    'errors' => $resultats_validation['rows'][$numero_ligne]
+                ];
+            } else {
+                // La ligne est valide
+                $donnees_valides[] = $ligne;
+            }
+        }
+    } else {
+        // Toutes les données sont valides
+        $donnees_valides = $donnees;
+    }
+    
+    return [$donnees_valides, $donnees_invalides];
+}
+
+/**
+ * Traite les données d'importation (valides et invalides)
+ */
+function traiterDonneesImportation($donnees_valides, $donnees_invalides, $rapport_import) {
+    $model = require __DIR__ . '/../Models/ApprenantModel.php';
+    $userModel = require __DIR__ . '/../Models/User.model.php';
+    
+    // Récupérer les listes d'emails et matricules existants
+    list($emails_existants, $matricules_existants) = recupererEmailsEtMatriculesExistants();
+    
+    // Traiter les données invalides
+    foreach ($donnees_invalides as $item) {
+        $donnees_apprenant = $item['row'];
+        $erreurs = $item['errors'];
+        
+        // Vérifier si c'est un doublon
+        $est_doublon = estDoublon($donnees_apprenant, $emails_existants, $matricules_existants);
+        
+        if ($est_doublon) {
+            $rapport_import['doublons']++;
+        } else {
+            // Ajouter à la liste d'attente
+            $model[Apprenant_Model_Key::ADD_TO_WAITING_LIST->value]($donnees_apprenant, $erreurs);
+            $rapport_import['attente']++;
+            
+            // Mettre à jour les listes
+            if (isset($donnees_apprenant['email']) && !empty($donnees_apprenant['email'])) {
+                $emails_existants[] = strtolower($donnees_apprenant['email']);
+            }
+            if (isset($donnees_apprenant['matricule']) && !empty($donnees_apprenant['matricule'])) {
+                $matricules_existants[] = $donnees_apprenant['matricule'];
+            }
+        }
+    }
+    
+    // Traiter les données valides
+    $activePromoInfo = getActivePromotionAndReferentiels();
+    
+    foreach ($donnees_valides as $ligne) {
+        try {
+            // Vérifier les doublons dans la base de données
+            $apprenant_existant = null;
+            if (isset($ligne['matricule']) && !empty($ligne['matricule'])) {
+                $apprenant_existant = $model[Apprenant_Model_Key::FIND_BY_MATRICULE->value]($ligne['matricule'] ?? '');
+            }
+
+            $utilisateur_existant = null;
+            if (isset($ligne['email']) && !empty($ligne['email'])) {
+                $utilisateur_existant = $userModel[UserModelKey::FIND_BY_EMAIL->value]($ligne['email']);
+            }
+
+            // Gérer les doublons
+            if ($apprenant_existant || $utilisateur_existant) {
+                $rapport_import = gererDoublon($ligne, $apprenant_existant, $utilisateur_existant, $model, $rapport_import, $emails_existants, $matricules_existants);
+                continue;
+            }
+
+            // Créer et ajouter l'apprenant
+            $rapport_import = ajouterNouvelApprenant($ligne, $activePromoInfo, $model, $userModel, $rapport_import);
+            
+        } catch (\Exception $e) {
+            // Gérer les erreurs
+            $rapport_import = gererErreurAjout($ligne, $e, $model, $rapport_import, $emails_existants, $matricules_existants);
+        }
+    }
+    
+    // Mettre à jour le nombre d'étudiants dans la promotion
+    if ($rapport_import['succes'] > 0) {
+        mettreAJourNombreEtudiants($activePromoInfo, $rapport_import['succes']);
+    }
+    
+    return $rapport_import;
+}
+
+/**
+ * Récupère les emails et matricules existants
+ */
+function recupererEmailsEtMatriculesExistants() {
+    $model = require __DIR__ . '/../Models/ApprenantModel.php';
+    $liste_attente = $model[Apprenant_Model_Key::GET_WAITING_LIST->value]();
+    
+    $emails_existants = [];
+    $matricules_existants = [];
+    
+    foreach ($liste_attente as $attente) {
+        if (isset($attente['email']) && !empty($attente['email'])) {
+            $emails_existants[] = strtolower($attente['email']);
+        }
+        if (isset($attente['matricule']) && !empty($attente['matricule'])) {
+            $matricules_existants[] = $attente['matricule'];
+        }
+    }
+    
+    return [$emails_existants, $matricules_existants];
+}
+
+/**
+ * Vérifie si un apprenant est un doublon
+ */
+function estDoublon($donnees_apprenant, $emails_existants, $matricules_existants) {
+    if (isset($donnees_apprenant['email']) && !empty($donnees_apprenant['email'])) {
+        $email = strtolower($donnees_apprenant['email']);
+        if (in_array($email, $emails_existants)) {
+            return true;
+        }
+    }
+    
+    if (isset($donnees_apprenant['matricule']) && !empty($donnees_apprenant['matricule'])) {
+        if (in_array($donnees_apprenant['matricule'], $matricules_existants)) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Gère les doublons détectés
+ */
+function gererDoublon($ligne, $apprenant_existant, $utilisateur_existant, $model, $rapport_import, $emails_existants, $matricules_existants) {
+    $rapport_import['doublons']++;
+    $messages_erreur = [];
+    
+    if ($apprenant_existant) {
+        $messages_erreur[] = "Matricule déjà existant : {$ligne['matricule']}";
+    }
+    
+    if ($utilisateur_existant) {
+        $messages_erreur[] = "Email déjà utilisé : {$ligne['email']}";
+    }
+    
+    // Vérifier si c'est un doublon dans la liste d'attente
+    $est_doublon = estDoublon($ligne, $emails_existants, $matricules_existants);
+    
+    if (!$est_doublon) {
+        $model[Apprenant_Model_Key::ADD_TO_WAITING_LIST->value]($ligne, ['doublon' => implode(', ', $messages_erreur)]);
+        $rapport_import['attente']++;
+        
+        // Mettre à jour les listes
+        if (isset($ligne['email']) && !empty($ligne['email'])) {
+            $emails_existants[] = strtolower($ligne['email']);
+        }
+        if (isset($ligne['matricule']) && !empty($ligne['matricule'])) {
+            $matricules_existants[] = $ligne['matricule'];
+        }
+    }
+    
+    return $rapport_import;
+}
+
+/**
+ * Ajoute un nouvel apprenant
+ */
+function ajouterNouvelApprenant($ligne, $activePromoInfo, $model, $userModel, $rapport_import) {
+    // Générer le matricule
+    $matricule = genererMatriculeImport($ligne, $activePromoInfo);
+    
+    // Gérer la photo si présente
+    $chemin_photo = null;
+    if (isset($ligne['photo_tmp']) && $ligne['photo_tmp']) {
+        $chemin_photo = handlePhotoUpload($ligne);
+    }  
+           
+    // Créer l'apprenant
+    $nouvel_apprenant = [
+        'prenom' => $ligne['prenom'],
+        'nom' => $ligne['nom'],
+        'date_naissance' => $ligne['date_naissance'],
+        'lieu_naissance' => $ligne['lieu_naissance'] ?? '',
+        'matricule' => $matricule,
+        'adresse' => $ligne['adresse'],
+        'telephone' => $ligne['telephone'],
+        'photo' => $chemin_photo,
+        'status' => 'actif',
+        'email' => $ligne['email'],
+        'promotion_id' => $activePromoInfo['promotion']['id'],
+        'referentiel_id' => $ligne['referentiel_id'],
+        'tuteur_prenom_nom' => $ligne['tuteur_prenom_nom'] ?? '',
+        'tuteur_adresse' => $ligne['tuteur_adresse'] ?? '',
+        'tuteur_telephone' => $ligne['tuteur_telephone'] ?? '',
+        'tuteur_lien_parente' => $ligne['tuteur_lien_parente'] ?? ''
+    ]; 
+   
+    // Ajouter l'apprenant et créer son compte utilisateur
+    $model[Apprenant_Model_Key::ADD->value]($nouvel_apprenant);  
+    $userModel[UserModelKey::ADD->value]([
+        'matricule' => $matricule,
+        'email' => $ligne['email'],
+        'password' => 'SON@TEL2025',
+        'role' => 'apprenant',
+        'password_change_required' => true
+    ]);
+    
+    $rapport_import['succes']++;
+    return $rapport_import;
+}
+
+/**
+ * Génère un matricule pour un apprenant importé
+ */
+function genererMatriculeImport($ligne, $activePromoInfo) {
+    $referentiels = $activePromoInfo['referentiels'];
+    $referentiels_par_id = [];
+    
+    foreach ($referentiels as $referentiel) {
+        $referentiels_par_id[$referentiel['id']] = $referentiel;
+    }
+
+    $referentiel_id = $ligne['referentiel_id'];
+    if (isset($referentiels_par_id[$referentiel_id])) {
+        $nom_referentiel = $referentiels_par_id[$referentiel_id]['nom'];
+    } else {
+        error_log("Référentiel non trouvé pour ID: $referentiel_id");
+        $nom_referentiel = "Inconnu";
+    }
+
+    return generer_matricule($ligne['nom'], $nom_referentiel);
+}
+
+/**
+ * Gère les erreurs lors de l'ajout d'un apprenant
+ */
+function gererErreurAjout($ligne, $exception, $model, $rapport_import, $emails_existants, $matricules_existants) {
+    $est_doublon = estDoublon($ligne, $emails_existants, $matricules_existants);
+    
+    if (!$est_doublon) {
+        $model[Apprenant_Model_Key::ADD_TO_WAITING_LIST->value]($ligne, ['exception' => $exception->getMessage()]);
+        $rapport_import['attente']++;
+        
+        // Mettre à jour les listes
+        if (isset($ligne['email']) && !empty($ligne['email'])) {
+            $emails_existants[] = strtolower($ligne['email']);
+        }
+        if (isset($ligne['matricule']) && !empty($ligne['matricule'])) {
+            $matricules_existants[] = $ligne['matricule'];
+        }
+    }
+    
+    $rapport_import['echec']++;
+    return $rapport_import;
+}
+
+/**
+ * Met à jour le nombre d'étudiants dans la promotion
+ */
+function mettreAJourNombreEtudiants($activePromoInfo, $nombre_nouveaux) {
+    $promotion = $activePromoInfo['promotion'];
+    $promoModel = require __DIR__ . '/../Models/Promo.model.php';
+    $promoModel['update']($promotion['id'], [
+        'nbr_etudiants' => ($promotion['nbr_etudiants'] ?? 0) + $nombre_nouveaux
+    ]);
+}
+
+/**
+ * Définit le message d'importation en fonction du rapport
+ */
+function definirMessageImportation($rapport_import) {
+    if ($rapport_import['succes'] > 0 && $rapport_import['attente'] > 0) {
+        // Cas où certains apprenants ont été importés et d'autres sont en attente
+        $message = "Importation terminée : {$rapport_import['succes']} apprenants importés avec succès, {$rapport_import['attente']} placés en liste d'attente.";
+        session_set('warning_message', ['content' => $message]);
+    } else if ($rapport_import['succes'] > 0) {
+        // Cas où tous les apprenants ont été importés avec succès
+        $message = "Importation réussie : {$rapport_import['succes']} apprenants importés.";
+        session_set('success_message', ['content' => $message]);
+    } else if ($rapport_import['attente'] > 0) {
+        // Cas où aucun apprenant n'a été importé, tous sont en attente
+        $message = "Importation terminée : Aucun apprenant importé, {$rapport_import['attente']} placés en liste d'attente.";
+        session_set('warning_message', ['content' => $message]);
+    } else {
+        // Cas où aucun apprenant n'a été importé et aucun n'est en attente
+        session_set('error_message', ['content' => "Échec de l'importation : Aucun apprenant importé."]);
+    }
+}
+
 function parse_excel_file($filepath) {
     try {
         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filepath);
@@ -731,7 +846,6 @@ function handlePhotoUpload($row) {
     return null;
 }
 
-// Fonction pour valider un apprenant en attente
 function validateWaitingApprenant() {
     session_init();
     
@@ -887,7 +1001,7 @@ function removeWaitingApprenant() {
     App\redirect('/apprenants?tab=waiting');
 }
 
-// Fonction pour afficher les détails d'un apprenant
+
 function showApprenant($matricule) {
     $apprenantModel = require __DIR__ . '/../Models/ApprenantModel.php';
     $apprenant = $apprenantModel[Apprenant_Model_Key::GET_BY_MATRICULE->value]($matricule);

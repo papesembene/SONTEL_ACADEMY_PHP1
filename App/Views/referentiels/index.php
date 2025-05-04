@@ -64,8 +64,8 @@ if ($show_all) {
     <?php endif; ?>
 
     <header>
-        <a href="/referentiels" class="back-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <a href="/referentiels" class="back-link" style="color:#009989;">
+            <svg width="16" height="16" viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
             Retour aux référentiels actifs
@@ -80,13 +80,13 @@ if ($show_all) {
             value="<?= htmlspecialchars($search ?? '') ?>">
         
         <?php if ($show_all): ?>
-            <a href="/referentiels" class="btn">
+            <a href="/referentiels" class="btn" style="background-color:#009989;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                 </svg>
                 Référentiels actifs
             </a>
-            <a href="/referentiels?action=create" class="btn">
+            <a href="/referentiels?action=create" class="btn" style="background-color:#009989;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 5v14M5 12h14"/>
                 </svg>
@@ -100,7 +100,7 @@ if ($show_all) {
                 </svg>
                 Tous les référentiels
             </a>
-            <a href="/referentiels?show_all=1&action=assign" class="btn btn-blue">
+            <a href="/referentiels?show_all=1&action=assign" style="background-color:#009989;" class="btn btn-blue">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 5v14M5 12h14"/>
                 </svg>
@@ -112,7 +112,7 @@ if ($show_all) {
     <!-- Formulaire de création de référentiel -->
     <?php if ($showCreateForm): ?>
     <div class="form-container">
-        <h2>Créer un nouveau référentiel</h2>
+        <h2 style="color:#009989;">Créer un nouveau référentiel</h2>
         <?php if (session_has('validation_errors')): ?>
             <div class="alert alert-danger">
                 <?php 
@@ -184,7 +184,7 @@ if ($show_all) {
             
             <div class="form-actions">
                 <a href="/referentiels" class="btn btn-secondary">Annuler</a>
-                <button type="submit" class="btn" name="action" value="create">Créer</button>
+                <button type="submit" class="btn" name="action" style="background-color:#009989;" value="create">Créer</button>
             </div>
         </form>
     </div>
@@ -294,6 +294,13 @@ if ($show_all) {
                             <i class="fas fa-calendar-alt"></i> <?= htmlspecialchars($referentiel['sessions']) ?>
                         </div>
                     <?php endif; ?>
+                    
+                    <!-- Ajouter ce bouton pour rediriger vers les apprenants de ce référentiel -->
+                    <div class="card-actions" style="margin-top: 15px;">
+                        <a href="/apprenants?referentiel=<?= $referentiel['id'] ?>&promotion=<?=$activePromotion['id']?>"  style="background-color:#009989;" class="btn btn-sm">
+                            <i class="fas fa-user-graduate"></i> Voir les apprenants
+                        </a>
+                    </div>
                 </div>
             </div>
         <?php endforeach; ?>

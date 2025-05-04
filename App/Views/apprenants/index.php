@@ -12,13 +12,13 @@
         <?php if ($action === 'list'): ?>
             <!-- Header with title and action buttons -->
             <div class="header">
-                <h2>Apprenants <span class="apprenant-count">180 apprenants</span></h2>
+                <h2>Apprenants <span class="apprenant-count"><?= count($allApprenants ?? $apprenants) ?>apprenant(s)</span></h2>
                 <div class="action-buttons">
                     <?php 
                         $today = new \DateTime();
                         $endDate = \DateTime::createFromFormat('d/m/Y', $activePromotion['date_fin']);
                         if ($endDate >= $today): ?>
-                            <a href="?action=add" class="btn btn-success">
+                            <a href="?action=add" class="btn btn-success" style="background-color:#009989;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M12 5v14M5 12h14"></path>
                                 </svg>
@@ -26,7 +26,7 @@
                             </a>
                        
 
-                        <a href="?action=import" class="btn btn-download">
+                        <a href="?action=import" class="btn btn-download" style="background-color:#009989;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
                             </svg>
@@ -48,12 +48,13 @@
                     <input type="text" placeholder="Rechercher...">
                 </div>
                 <div class="filter-dropdown">
-                    <select>
+                    <select onchange="window.location.href='?tab=<?= $tab ?>&referentiel=' + this.value">
                         <option value="">Filtre par classe</option>
-                        <?php foreach($referentiels as $ref) :?>
-                        <option value=""><?=$ref['nom']?></option>
+                        <?php foreach($allreferentiels as $ref) :?>
+                        <option value="<?= $ref['id'] ?>" <?= isset($referentielFilter) && $referentielFilter === $ref['id'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($ref['nom']) ?>
+                        </option>
                         <?php endforeach; ?>
-                        
                     </select>
                 </div>
                 <div class="filter-dropdown">
@@ -64,8 +65,37 @@
                         <option value="replaced">Remplacé</option>
                     </select>
                 </div>
+                
+                <?php if (isset($referentielFilter) && !empty($referentielFilter)): ?>
+                <div class="filter-actions">
+                    <a href="?tab=<?= $tab ?>" class="btn btn-clear">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Effacer le filtre
+                    </a>
+                </div>
+                <?php endif; ?>
             </div>
 
+            <!-- Afficher un message indiquant le filtre actif -->
+            <?php if (isset($referentielFilter) && !empty($referentielFilter)): 
+                $referentielNom = '';
+                foreach ($allreferentiels as $ref) {
+                    if ($ref['id'] === $referentielFilter) {
+                        $referentielNom = $ref['nom'];
+                        break;
+                    }
+                }
+                if (!empty($referentielNom)):
+            ?>
+                <div class="filter-info">
+                    <span>Filtré par référentiel: <strong><?= htmlspecialchars($referentielNom) ?></strong></span>
+                </div>
+            <?php 
+                endif;
+            endif; 
+            ?>
             <!-- Tabs -->
             <div class="tabs">
 
@@ -224,30 +254,63 @@
             <div class="pagination">
                 <div class="page-info">
                     <span>Apprenants/page:</span>
-                    <select onchange="window.location.href='?per_page=' + this.value + '<?= isset($_GET['tab']) ? '&tab=' . $_GET['tab'] : '' ?>'">
-                        <option value="10" <?= ($perPage ?? 10) == 10 ? 'selected' : '' ?>>10</option>
-                        <option value="20" <?= ($perPage ?? 10) == 20 ? 'selected' : '' ?>>20</option>
-                        <option value="50" <?= ($perPage ?? 10) == 50 ? 'selected' : '' ?>>50</option>
+                    <select onchange="window.location.href='?per_page=' + this.value + '&tab=<?= $tab ?><?= isset($referentielFilter) ? '&referentiel=' . $referentielFilter : '' ?>'">
+                        <option value="10" <?= $perPage == 10 ? 'selected' : '' ?>>10</option>
+                        <option value="20" <?= $perPage == 20 ? 'selected' : '' ?>>20</option>
+                        <option value="50" <?= $perPage == 50 ? 'selected' : '' ?>>50</option>
                     </select>
                 </div>
                 <div class="page-info">
-                    <?= $startIndex ?? 1 ?> à <?= $endIndex ?? count($apprenants) ?> apprenants pour <?= $totalItems ?? count($apprenants) ?>
+                    <?= $startIndex ?> à <?= $endIndex ?> apprenants pour <?= $totalItems ?>
                 </div>
                 <div class="page-controls">
-                    <a href="?page=<?= max(1, ($currentPage ?? 1) - 1) ?><?= isset($_GET['tab']) ? '&tab=' . $_GET['tab'] : '' ?>" class="page-button <?= ($currentPage ?? 1) <= 1 ? 'disabled' : '' ?>"><</a>
+                    <a href="?page=<?= max(1, $currentPage - 1) ?>&tab=<?= $tab ?>&per_page=<?= $perPage ?><?= isset($referentielFilter) ? '&referentiel=' . $referentielFilter : '' ?>" 
+                       class="page-button <?= $currentPage <= 1 ? 'disabled' : '' ?>"><</a>
                     
-                    <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
-                        <a href="?page=<?= $i ?><?= isset($_GET['tab']) ? '&tab=' . $_GET['tab'] : '' ?>" class="page-button <?= ($currentPage ?? 1) == $i ? 'active' : '' ?>"><?= $i ?></a>
-                    <?php endfor; ?>
+                    <?php 
+                    // Afficher un nombre limité de pages avec ellipsis
+                    $maxPagesToShow = 5;
+                    $startPage = max(1, $currentPage - floor($maxPagesToShow / 2));
+                    $endPage = min($totalPages, $startPage + $maxPagesToShow - 1);
                     
-                    <a href="?page=<?= min(($totalPages ?? 1), ($currentPage ?? 1) + 1) ?><?= isset($_GET['tab']) ? '&tab=' . $_GET['tab'] : '' ?>" class="page-button <?= ($currentPage ?? 1) >= ($totalPages ?? 1) ? 'disabled' : '' ?>">></a>
+                    // Ajuster startPage si on est proche de la fin
+                    if ($endPage - $startPage + 1 < $maxPagesToShow) {
+                        $startPage = max(1, $endPage - $maxPagesToShow + 1);
+                    }
+                    
+                    // Afficher la première page et ellipsis si nécessaire
+                    if ($startPage > 1) {
+                        echo '<a href="?page=1&tab=' . $tab . '&per_page=' . $perPage . (isset($referentielFilter) ? '&referentiel=' . $referentielFilter : '') . '" class="page-button">1</a>';
+                        if ($startPage > 2) {
+                            echo '<span class="page-ellipsis">...</span>';
+                        }
+                    }
+                    
+                    // Afficher les pages
+                    for ($i = $startPage; $i <= $endPage; $i++): 
+                    ?>
+                        <a href="?page=<?= $i ?>&tab=<?= $tab ?>&per_page=<?= $perPage ?><?= isset($referentielFilter) ? '&referentiel=' . $referentielFilter : '' ?>" 
+                           class="page-button <?= $currentPage == $i ? 'active' : '' ?>"><?= $i ?></a>
+                    <?php endfor; 
+                    
+                    // Afficher la dernière page et ellipsis si nécessaire
+                    if ($endPage < $totalPages) {
+                        if ($endPage < $totalPages - 1) {
+                            echo '<span class="page-ellipsis">...</span>';
+                        }
+                        echo '<a href="?page=' . $totalPages . '&tab=' . $tab . '&per_page=' . $perPage . (isset($referentielFilter) ? '&referentiel=' . $referentielFilter : '') . '" class="page-button">' . $totalPages . '</a>';
+                    }
+                    ?>
+                    
+                    <a href="?page=<?= min($totalPages, $currentPage + 1) ?>&tab=<?= $tab ?>&per_page=<?= $perPage ?><?= isset($referentielFilter) ? '&referentiel=' . $referentielFilter : '' ?>" 
+                       class="page-button <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">></a>
                 </div>
             </div>
         <?php elseif ($action === 'import'): ?>
             <!-- Formulaire d'import Excel -->
             <div class="apprenant-form-container">
                 <div class="form-header">
-                    <h1>Importer la liste des apprenants</h1>
+                    <h1 style="color:#009989;" >Importer la liste des apprenants</h1>
                 </div>
                 <?php if (session_has('warning_message')):?>
                     <div style="color:orange; padding: 10px; background-color: #fff3cd; border-radius: 5px; margin-bottom: 20px;">
@@ -268,10 +331,7 @@
                         <?= htmlspecialchars(session_get('success_message')['content']) ?>
                         <?php session_remove('success_message'); ?>
                     </div>
-                <?php endif; ?>
-                
-               
-                
+                <?php endif; ?> 
                 <form action="/apprenants/import" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="import">
                     <input type="hidden" id="promotion_id" name="promotion_id" value="<?= htmlspecialchars($activePromotion['id']) ?>" readonly>                  
@@ -292,15 +352,15 @@
                     </div>
                     <div class="form-footer">
                         <a href="/apprenants" class="btn btn-secondary">Annuler</a>
-                        <button type="submit" class="btn btn-primary">Importer</button>
+                        <button type="submit" class="btn btn-primary" style="background-color:#009989;">Importer</button>
                     </div>
                 </form>
             </div>
         <?php elseif ($action === 'add' || $action === 'edit_waiting'): ?>
             <!-- Formulaire d'ajout d'apprenant -->
                 <div class="apprenant-form-container">
-        <div class="form-header">
-            <h1><?= $action === 'add' ? 'Ajout apprenant' : 'Correction apprenant' ?></h1>
+        <div class="form-header" style="color:#009989;">
+            <h1 style="color:#009989;"><?= $action === 'add' ? 'Ajout apprenant' : 'Correction apprenant' ?></h1>
         </div>
 
     <?php if (session_has('error_message')): ?>
@@ -455,7 +515,7 @@
                 <button type="submit" class="btn btn-primary">Valider l'apprenant</button>
             <?php else: ?>
                 <a href="/apprenants" class="btn btn-secondary">Annuler</a>
-                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <button type="submit" class="btn btn-primary" style="background-color:#009989;">Enregistrer</button>
             <?php endif; ?>
         </div>
     </form>

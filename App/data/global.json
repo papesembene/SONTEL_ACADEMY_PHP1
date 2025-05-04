@@ -80,8 +80,7 @@
             "statut": "active",
             "nbr_etudiants": 13,
             "referentiels": [
-                "ref_680d15de62484",
-                "ref_681100594151a"
+                "ref_680d15de62484"
             ],
             "id": "promo_680d15f735c19"
         },
@@ -96,6 +95,19 @@
                 "ref_680d15de62484"
             ],
             "id": "promo_680e166bd110f"
+        },
+        {
+            "nom": "Promotion 2",
+            "date_debut": "12\/02\/2018",
+            "date_fin": "13\/12\/2018",
+            "photo": "promo_6814c5254a393.png",
+            "statut": "inactive",
+            "nbr_etudiants": 0,
+            "referentiels": [
+                "ref_680d15de62484",
+                "ref_681100594151a"
+            ],
+            "id": "promo_6814c5254a4fd"
         }
     ],
     "apprenants": [
@@ -108,7 +120,7 @@
             "adresse": "Dakar, Nord Foire",
             "photo": "app_680d1604259b9.png",
             "statut": "actif",
-            "promotion": "promo_680d15f735c19",
+            "promotion_id": "promo_680d15f735c19",
             "referentiel_id": "ref_680d15de62484",
             "id": "app_680d160425a2f",
             "matricule": "APP001"
@@ -282,6 +294,275 @@
             "id": "wait_6813c2e0eba73",
             "errors": {
                 "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        },
+        "4": {
+            "prenom": "modou",
+            "nom": "fall",
+            "date_naissance": "invalid-date",
+            "lieu_naissance": "ZIGUINCHOR",
+            "matricule": "INVALIDMAT0",
+            "adresse": "GUEDIAWAYE",
+            "telephone": "711672031",
+            "photo": "photo_0.png",
+            "statut": "suspendu",
+            "email": "email_invalide_0",
+            "promotion_id": "promo_6011",
+            "referentiel_id": "ref_9625",
+            "tuteur_nom": "ibou diouf",
+            "tuteur_adresse": "Diamniadio",
+            "tuteur_telephone": "tuteur_num_invalide",
+            "lien_parente": "mere",
+            "id": "wait_681405440668d",
+            "errors": {
+                "email": "L'adresse email est invalide.",
+                "telephone": "Le num\u00e9ro de t\u00e9l\u00e9phone est invalide. Il doit contenir 9 chiffres et commencer par 76, 77, 78, 75 ou 70.",
+                "date_naissance": "Format de date invalide (YYYY-MM-DD requis)",
+                "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        },
+        "5": {
+            "prenom": "el hadji",
+            "nom": "ba",
+            "date_naissance": "1990-09-12",
+            "lieu_naissance": "DAKAR",
+            "matricule": "SEM1HAC20250428",
+            "adresse": "GUEDIAWAYE",
+            "telephone": "num_invalide",
+            "photo": "photo_1.png",
+            "statut": "",
+            "email": "el hadji.ba1@gmail.com",
+            "promotion_id": "promo_7178",
+            "referentiel_id": "ref_2296",
+            "tuteur_nom": "amina sow",
+            "tuteur_adresse": "Thiaroye",
+            "tuteur_telephone": "787386007",
+            "lien_parente": "oncle",
+            "id": "wait_6814054406946",
+            "errors": {
+                "email": "L'adresse email est invalide.",
+                "telephone": "Le num\u00e9ro de t\u00e9l\u00e9phone est invalide. Il doit contenir 9 chiffres et commencer par 76, 77, 78, 75 ou 70.",
+                "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        },
+        "6": {
+            "prenom": "ibrahima",
+            "nom": "ba",
+            "date_naissance": "1992-10-27",
+            "lieu_naissance": "ZIGUINCHOR",
+            "matricule": "SEM2HAC20250428",
+            "adresse": "DIAMNIADIO",
+            "telephone": "752434919",
+            "photo": "photo_2.png",
+            "statut": "actif",
+            "email": "ibrahima.ba2@gmail.com",
+            "promotion_id": "promo_7907",
+            "referentiel_id": "ref_7514",
+            "tuteur_nom": "anta fall",
+            "tuteur_adresse": "Thiaroye",
+            "tuteur_telephone": "779952305",
+            "lien_parente": "tante",
+            "id": "wait_6814054406b15",
+            "errors": {
+                "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        },
+        "7": {
+            "prenom": "ibrahima",
+            "nom": "gueye",
+            "date_naissance": "invalid-date",
+            "lieu_naissance": "THIES",
+            "matricule": "SEM3HAC20250428",
+            "adresse": "DIAMNIADIO",
+            "telephone": "num_invalide",
+            "photo": "photo_3.png",
+            "statut": "",
+            "email": "ibrahima.gueye3@gmail.com",
+            "promotion_id": "promo_8941",
+            "referentiel_id": "ref_6638",
+            "tuteur_nom": "amina sow",
+            "tuteur_adresse": "Thiaroye",
+            "tuteur_telephone": "tuteur_num_invalide",
+            "lien_parente": "mere",
+            "id": "wait_6814054406cbd",
+            "errors": {
+                "telephone": "Le num\u00e9ro de t\u00e9l\u00e9phone est invalide. Il doit contenir 9 chiffres et commencer par 76, 77, 78, 75 ou 70.",
+                "date_naissance": "Format de date invalide (YYYY-MM-DD requis)",
+                "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        },
+        "8": {
+            "prenom": "amy",
+            "nom": "gueye",
+            "date_naissance": "2004-07-02",
+            "lieu_naissance": "THIES",
+            "matricule": "INVALIDMAT4",
+            "adresse": "PARCELLES",
+            "telephone": "718107538",
+            "photo": "photo_4.png",
+            "statut": "inactif",
+            "email": "amy.gueye4@gmail.com",
+            "promotion_id": "promo_4306",
+            "referentiel_id": "ref_6065",
+            "tuteur_nom": "amina sow",
+            "tuteur_adresse": "Diamniadio",
+            "tuteur_telephone": "787476253",
+            "lien_parente": "pere",
+            "id": "wait_6814054406e6c",
+            "errors": {
+                "telephone": "Le num\u00e9ro de t\u00e9l\u00e9phone est invalide. Il doit contenir 9 chiffres et commencer par 76, 77, 78, 75 ou 70.",
+                "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        },
+        "9": {
+            "prenom": "fatou",
+            "nom": "ba",
+            "date_naissance": "1995-06-27",
+            "lieu_naissance": "THIES",
+            "matricule": "SEM5HAC20250428",
+            "adresse": "DIAMNIADIO",
+            "telephone": "num_invalide",
+            "photo": "photo_5.png",
+            "statut": "actif",
+            "email": "email_invalide_5",
+            "promotion_id": "promo_6283",
+            "referentiel_id": "ref_8075",
+            "tuteur_nom": "amina sow",
+            "tuteur_adresse": "Diamniadio",
+            "tuteur_telephone": "780497888",
+            "lien_parente": "pere",
+            "id": "wait_6814054407027",
+            "errors": {
+                "email": "L'adresse email est invalide.",
+                "telephone": "Le num\u00e9ro de t\u00e9l\u00e9phone est invalide. Il doit contenir 9 chiffres et commencer par 76, 77, 78, 75 ou 70.",
+                "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        },
+        "10": {
+            "prenom": "moussa",
+            "nom": "ba",
+            "date_naissance": "invalid-date",
+            "lieu_naissance": "THIES",
+            "matricule": "SEM6HAC20250428",
+            "adresse": "DIAMNIADIO",
+            "telephone": "770086073",
+            "photo": "photo_6.png",
+            "statut": "actif",
+            "email": "moussa.ba6@gmail.com",
+            "promotion_id": "promo_2517",
+            "referentiel_id": "ref_4844",
+            "tuteur_nom": "amina sow",
+            "tuteur_adresse": "Diamniadio",
+            "tuteur_telephone": "tuteur_num_invalide",
+            "lien_parente": "oncle",
+            "id": "wait_68140544071eb",
+            "errors": {
+                "date_naissance": "Format de date invalide (YYYY-MM-DD requis)",
+                "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        },
+        "11": {
+            "prenom": "pape birame",
+            "nom": "sarr",
+            "date_naissance": "2003-10-06",
+            "lieu_naissance": "DAKAR",
+            "matricule": "SEM7HAC20250428",
+            "adresse": "DIAMNIADIO",
+            "telephone": "num_invalide",
+            "photo": "photo_7.png",
+            "statut": "suspendu",
+            "email": "pape birame.sarr7@gmail.com",
+            "promotion_id": "promo_8995",
+            "referentiel_id": "ref_4029",
+            "tuteur_nom": "omar ndiaye",
+            "tuteur_adresse": "Pikine",
+            "tuteur_telephone": "774215331",
+            "lien_parente": "pere",
+            "id": "wait_68140544073ce",
+            "errors": {
+                "email": "L'adresse email est invalide.",
+                "telephone": "Le num\u00e9ro de t\u00e9l\u00e9phone est invalide. Il doit contenir 9 chiffres et commencer par 76, 77, 78, 75 ou 70.",
+                "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        },
+        "12": {
+            "prenom": "binta",
+            "nom": "fall",
+            "date_naissance": "1998-11-20",
+            "lieu_naissance": "KAOLACK",
+            "matricule": "INVALIDMAT8",
+            "adresse": "DIAMNIADIO",
+            "telephone": "727109087",
+            "photo": "photo_8.png",
+            "statut": "actif",
+            "email": "binta.fall8@gmail.com",
+            "promotion_id": "promo_4674",
+            "referentiel_id": "ref_2437",
+            "tuteur_nom": "anta fall",
+            "tuteur_adresse": "Pikine",
+            "tuteur_telephone": "770922177",
+            "lien_parente": "tante",
+            "id": "wait_68140544075b4",
+            "errors": {
+                "telephone": "Le num\u00e9ro de t\u00e9l\u00e9phone est invalide. Il doit contenir 9 chiffres et commencer par 76, 77, 78, 75 ou 70.",
+                "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        },
+        "13": {
+            "prenom": "modou",
+            "nom": "camara",
+            "date_naissance": "invalid-date",
+            "lieu_naissance": "SAINT-LOUIS",
+            "matricule": "SEM9HAC20250428",
+            "adresse": "PARCELLES",
+            "telephone": "num_invalide",
+            "photo": "photo_9.png",
+            "statut": "suspendu",
+            "email": "modou.camara9@gmail.com",
+            "promotion_id": "promo_1186",
+            "referentiel_id": "ref_8337",
+            "tuteur_nom": "ibou diouf",
+            "tuteur_adresse": "Diamniadio",
+            "tuteur_telephone": "tuteur_num_invalide",
+            "lien_parente": "mere",
+            "id": "wait_68140544077cb",
+            "errors": {
+                "telephone": "Le num\u00e9ro de t\u00e9l\u00e9phone est invalide. Il doit contenir 9 chiffres et commencer par 76, 77, 78, 75 ou 70.",
+                "date_naissance": "Format de date invalide (YYYY-MM-DD requis)",
+                "referentiel_id": "R\u00e9f\u00e9rentiel inexistant"
+            },
+            "status": "waiting"
+        },
+        "14": {
+            "prenom": "pape birame",
+            "nom": "sembene",
+            "date_naissance": "2002-02-12",
+            "lieu_naissance": "DAKAR",
+            "matricule": "SEMHAC20250428",
+            "adresse": "DIAMNIADIO",
+            "telephone": "781157773",
+            "photo": "ref_680f3f61d4fa5.png",
+            "statut": "actif",
+            "email": "sembenpape4@gmail.com",
+            "promotion_id": "promo_680d15f735c19",
+            "referentiel_id": "ref_680d15de62484",
+            "tuteur_nom": "anta falll",
+            "tuteur_adresse": "diamniadio",
+            "tuteur_telephone": "784529557",
+            "lien_parente": "mere",
+            "id": "wait_6816b2131b7d7",
+            "errors": {
+                "email": "Email existe d\u00e9j\u00e0 en base de donn\u00e9es"
             },
             "status": "waiting"
         }

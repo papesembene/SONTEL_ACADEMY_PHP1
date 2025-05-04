@@ -130,6 +130,44 @@ body {
     gap: 10px;
 }
 
+/* Styles pour les actions de filtre */
+.filter-actions {
+    display: flex;
+    align-items: center;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Style pour la pagination avec filtre */
+.pagination a {
+    text-decoration: none;
+}
+
+.pagination a.page-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Tabs styling */
 .tabs {
     display: flex;
@@ -264,46 +302,68 @@ tr:hover {
 }
 
 /* Pagination styling */
+/* Styles pour la pagination */
 .pagination {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 20px;
     padding: 10px 0;
+    border-top: 1px solid #eee;
 }
 
 .page-info {
-    color: var(--gray);
     font-size: 14px;
+    color: #666;
+}
+
+.page-info select {
+    margin-left: 5px;
+    padding: 3px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 .page-controls {
     display: flex;
-    gap: 5px;
+    align-items: center;
 }
 
 .page-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 30px;
     height: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: var(--border-radius);
+    margin: 0 2px;
     border: 1px solid #ddd;
-    cursor: pointer;
-    background-color: white;
-    color: var(--gray);
+    border-radius: 4px;
+    background-color: #fff;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.page-button:hover {
+    background-color: #f5f5f5;
 }
 
 .page-button.active {
-    background-color: #FF9800;
+    background-color: #ff6b1b;
     color: white;
-    border-color: #FF9800;
+    border-color: #ff6b1b;
 }
 
 .page-button.disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    pointer-events: none;
+}
+
+.page-ellipsis {
+    margin: 0 5px;
+    color: #666;
 }
 
 :root {
@@ -419,7 +479,7 @@ tr:hover {
     background-color: #f8d7da;
     border-radius: 5px;
     margin-bottom: 20px;
-    border: 1px solid #f5c6cb;
+    border: 1px solid var(--border-color);
 }
 
 .error-message {

@@ -1,13 +1,47 @@
 <?php
 $initiales = '';
 if (session_has('user')) {
-    $nomComplet = trim(session_get('user')['nom'] ?? '');
-    $mots = explode(' ', $nomComplet);
+    $user = session_get('user');
     
-    if (count($mots) >= 2) {
-        $initiales = strtoupper(substr($mots[0], 0, 1) . substr($mots[1], 0, 1));
+    // Différencier le traitement selon le rôle
+    if ($user['role'] === 'apprenant') {
+        // Pour les apprenants, récupérer les données complètes
+        $apprenant = App\Controllers\Apprenants\getApprenantById($user['matricule']);
+        
+        if ($apprenant) {
+            // Utiliser le prénom et le nom de l'apprenant
+            $prenom = trim($apprenant['prenom'] ?? '');
+            $nom = trim($apprenant['nom'] ?? '');
+            
+            // Prendre la première lettre du prénom et la première lettre du nom
+            if (!empty($prenom) && !empty($nom)) {
+                $initiales = strtoupper(substr($prenom, 0, 1) . substr($nom, 0, 1));
+            } else {
+                // Fallback si l'un des deux est vide
+                $nomComplet = trim($prenom . ' ' . $nom);
+                $initiales = strtoupper(substr($nomComplet, 0, 2));
+            }
+        } else {
+            // Fallback si l'apprenant n'est pas trouvé
+            $nomComplet = trim($user['nom'] ?? '');
+            $mots = explode(' ', $nomComplet);
+            
+            if (count($mots) >= 2) {
+                $initiales = strtoupper(substr($mots[0], 0, 1) . substr($mots[1], 0, 1));
+            } else {
+                $initiales = strtoupper(substr($nomComplet, 0, 2));
+            }
+        }
     } else {
-        $initiales = strtoupper(substr($nomComplet, 0, 2));
+        // Pour les admins, garder la logique actuelle
+        $nomComplet = trim($user['nom'] ?? '');
+        $mots = explode(' ', $nomComplet);
+        
+        if (count($mots) >= 2) {
+            $initiales = strtoupper(substr($mots[0], 0, 1) . substr($mots[1], 0, 1));
+        } else {
+            $initiales = strtoupper(substr($nomComplet, 0, 2));
+        }
     }
 }   
 $promotionActive = App\Controllers\Promotions\get_active_promotion();
@@ -125,7 +159,24 @@ $promotionActive = App\Controllers\Promotions\get_active_promotion();
                 
                 <div class="user-profile">
                     <div class="user-info">
-                    <div class="user-name"><?= session_has('user') ? htmlspecialchars(session_get('user')['nom']) : '' ?></div>
+
+                    <div class="user-name">
+                        <?php 
+                        if (session_has('user')) {
+                            $user = session_get('user');
+                            if ($user['role'] === 'apprenant') {
+                                $apprenant = App\Controllers\Apprenants\getApprenantById($user['matricule']);
+                                if ($apprenant) {
+                                    echo htmlspecialchars($apprenant['prenom'] . ' ' . $apprenant['nom']);
+                                } else {
+                                    echo htmlspecialchars($user['nom']);
+                                }
+                            } else {
+                                echo htmlspecialchars($user['nom']);
+                            }
+                        }
+                        ?>
+                    </div>
                         <div class="user-role"><?=session_has('user') ? htmlspecialchars(session_get('user')['role']) : '' ?></div>
                     </div>
                     

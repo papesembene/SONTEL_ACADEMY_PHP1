@@ -3,6 +3,7 @@ session_init();
 $user = session_get('user');
 $id = $user['matricule'];
 $apprenant = App\Controllers\Apprenants\getApprenantById($id);
+
 if (!$apprenant) {
     echo "L'apprenant n'a pas été trouvé.";
     die;
@@ -23,7 +24,7 @@ $qrData = sprintf(
     $referentiel['nom'] ?? ''
 );
 // Générer l'URL du QR code
-$qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?data=" . urlencode($qrData) . "&size=200x200";
+$qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?data=" . urlencode($qrData) . "&size=300x300";
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -313,11 +314,28 @@ $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?data=" . urlencode($qr
         
         @media (max-width: 768px) {
             .dashboard-container {
-                flex-direction: column;
+                flex-direction: column-reverse; /* Afficher le QR en haut */
             }
             
             .left-column, .right-column {
                 width: 100%;
+            }
+            
+            .qr-card {
+                margin-bottom: 20px;
+            }
+            
+            /* S'assurer que le QR code est visible */
+            .qr-code {
+                display: block;
+                width: 150px;
+                height: 150px;
+            }
+            
+            .qr-code img {
+                display: block;
+                width: 100%;
+                height: 100%;
             }
         }
     </style>
@@ -328,14 +346,14 @@ $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?data=" . urlencode($qr
         <div class="head">
             <h1>Tableau de Bord</h1>
         </div>
-        
+       
         <div class="profile-card">
             <div class="profile-image">
-                <?php if(isset($apprenant['photo']) && $apprenant['photo']): ?>
-                    <img src="<?= $apprenant['photo'] ?>" alt="Photo de profil">
+                <?php if (!empty($apprenant['photo'])): ?>
+                    <img src="/uploads/apprenants/<?= htmlspecialchars($apprenant['photo']) ?>" alt="Photo de profil">
                 <?php else: ?>
-                    <img src="https://via.placeholder.com/80" alt="Photo de profil">
-                <?php endif; ?>
+                        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar par défaut">
+                    <?php endif; ?>
             </div>
             <div class="profile-info">
                 <h2><?= $apprenant['prenom'] . ' ' . $apprenant['nom'] ?></h2>
