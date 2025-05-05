@@ -203,7 +203,9 @@ function handleApprenantActions() {
                     'activeData' => $activeData,
                     'activePromotion' => $activePromotion,
                     'referentiels' => $referentiels,
-                    // Ajouter les informations de pagination
+                    // Add this line:
+                    'current_page' => 'apprenants',
+                    // Rest of your data...
                     'currentPage' => $currentPage,
                     'perPage' => $perPage,
                     'totalItems' => $totalItems,
