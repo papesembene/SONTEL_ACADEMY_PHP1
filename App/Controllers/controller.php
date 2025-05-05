@@ -2,7 +2,15 @@
 namespace App\Controllers;
 require_once __DIR__.'/../Services/session.service.php';
 
-define('BASE_URL', 'http://pape.birame.sa.edu.sn:8031');
+// define('BASE_URL', 'http://pape.birame.sa.edu.sn:8031');
+
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'];
+define('BASE_URL', $protocol . '://' . $host);
+
+// Définir ASSETS_PATH de manière absolue
+define('ASSETS_PATH', BASE_URL . '/assets');
+
 
 function redirect($path) {
     header('Location: ' . BASE_URL . $path);
