@@ -44,7 +44,7 @@ $fonctions_models = [
         $result =file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
         if ($result === false) {
             error_log("Échec écriture fichier");
-            throw new RuntimeException("Erreur d'écriture");
+            throw new \RuntimeException("Failed to save data to file: $file_path");
         }
         
         error_log("Sauvegarde réussie");

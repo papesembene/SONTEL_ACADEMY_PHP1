@@ -55,9 +55,20 @@ function login()
             });
             exit;
         } catch (Exception $e) {     
+            // New error handling code
+            $errorMessage = 'Identifiants incorrects. Veuillez réessayer.';
+            
+            // Try to get a more specific message if available
             $errorKey = $e->getMessage();
-            $errors = require __DIR__.'/error.controller.php'; 
-            session_set('login_errors', [$errors[$errorKey] ?? 'Une erreur est survenue']);
+            if ($errorKey === 'required_field') {
+                $errorMessage = 'Veuillez remplir tous les champs.';
+            } elseif ($errorKey === 'invalid_credentials') {
+                $errorMessage = 'Identifiants incorrects. Veuillez réessayer.';
+            } elseif ($errorKey === 'invalid_user_data') {
+                $errorMessage = 'Données utilisateur invalides. Contactez l\'administrateur.';
+            }
+            
+            session_set('login_errors', [$errorMessage]);
             session_set('old_input', [
                 'login' => $login
             ]);
