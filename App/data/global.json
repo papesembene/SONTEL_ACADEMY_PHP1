@@ -51,9 +51,9 @@
     ],
     "referentiels": [
         {
-            "nom": "HACKEUSE",
+            "nom": "REFERENT DIGITAL",
             "description": "formation destinee uniquement aux femmes",
-            "photo": "ref_680d15de62407.png",
+            "photo": "ref dig.png",
             "capacite": "25",
             "sessions": "2 sessions",
             "nbr_modules": 0,
@@ -63,7 +63,7 @@
         {
             "nom": "DEV WEB\/MOBILE",
             "description": "developpement web mobile",
-            "photo": "ref_68110059414a7.png",
+            "photo": "dev web.png",
             "capacite": "30",
             "sessions": "1 session",
             "nbr_modules": 0,
