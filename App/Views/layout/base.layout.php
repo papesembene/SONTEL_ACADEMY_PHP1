@@ -132,6 +132,19 @@ $promotionActive = App\Controllers\Promotions\get_active_promotion();
                 <i class="fas fa-user"></i>
                 <span>Mon Profil</span>
             </a>
+
+            <a href="presences_apprenant" class="menu-item">
+                <i class="fas fa-calendar-check"></i>
+                <span>Mes Présences</span>
+            </a>
+            <a href="modules_apprenant" class="menu-item">
+                <i class="fas fa-book"></i>
+                <span>Mes Modules</span>
+            </a>
+            <a href="evaluations_apprenant" class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Mes Évaluations</span>
+            </a>
             <?php endif; ?>
             <br><br><br><br><br><br><br><br>
             <a href="logout" class="menu-item <?= $currentPage == 'rapports' ? 'active' : '' ?>">
